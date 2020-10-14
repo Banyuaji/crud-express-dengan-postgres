@@ -4,60 +4,63 @@ const pool = require('./db')
 
 app.use(express.json())
 
-//ROUTES
-
-//get all todos
-app.get('/todos', async(req, res) =>{
+app.post('/siswa', async(req, res) =>{
     try {
-        const getTodo = await pool.query(
-            "SELECT * FROM todo"
+        const {nisn} = req.body;
+        const {nama} = req.body;
+        const {jkl} = req.body;
+        const {alamat} = req.body;
+        const {kelas} = req.body;
+        const {jurusan} = req.body;
+        const nMurid = await pool.query(
+            "INSERT INTO murid (nisn, nama, jkl, alamat, kelas, jurusan) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
+            [nisn, nama, jkl, alamat, kelas, jurusan]
         );
 
-        res.json(getTodo.rows)
+        res.json(nMurid.rows)
+    } catch (err) {
+        console.log(err)
+    }
+})
+
+app.get('/siswa', async(req, res) =>{
+    try {
+        const gMurid = await pool.query(
+            "SELECT * FROM murid"
+        );
+
+        res.json(gMurid.rows)
     } catch (err) {
         console.log(err.message)
     }
 })
 
-//get a todo
-app.get('/todos/:id', async(req, res) =>{
+app.get('/siswa/:id', async(req, res) =>{
     const {id} = req.params
     try {
-        const getTodo = await pool.query(
-            "SELECT * FROM todo WHERE todo_id = $1",
+        const gMurid = await pool.query(
+            "SELECT * FROM murid WHERE id = $1",
             [id]
         );
 
-        res.json(getTodo.rows)
+        res.json(gMurid.rows)
     } catch (err) {
         console.log(err.message)
     }
 })
 
-//create a todo
-app.post('/todos', async(req, res) =>{
-    try {
-        const {description} = req.body;
-        const newTodo = await pool.query(
-            "INSERT INTO todo (description) VALUES ($1) RETURNING *",
-            [description]
-        );
-
-        res.json(newTodo.rows)
-        console.log(req.body)
-    } catch (err) {
-        console.log(err.message)
-    }
-})
-
-//update a todo
-app.put('/todos/:id', async(req, res) =>{
+app.put('/siswa/:id', async(req, res) =>{
     try {
         const {id} = req.params;
-        const {description} = req.body
+        const {nisn} = req.body;
+        const {nama} = req.body;
+        const {jkl} = req.body;
+        const {alamat} = req.body;
+        const {kelas} = req.body;
+        const {jurusan} = req.body;
         const updateTodo = await pool.query(
-            "UPDATE todo SET description = $1 WHERE todo_id = $2",
-            [description, id]
+            "UPDATE murid SET nisn = $1, nama = $2, jkl = $3, alamat = $4, kelas = $5, jurusan = $6 WHERE id = $7",
+            [nisn, nama, jkl, alamat, kelas, jurusan, id]
         );
 
         res.json("Todo Updated")
@@ -67,7 +70,7 @@ app.put('/todos/:id', async(req, res) =>{
 })
 
 //delete a todo
-app.delete('todos/:id', async(req, res)=> {
+app.delete('siswa/:id', async(req, res)=> {
     try {
         const {id} = req.params;
         const deleteTodo = await pool.query(
@@ -80,6 +83,6 @@ app.delete('todos/:id', async(req, res)=> {
     }
 })
 
-app.listen(5000, () => {
+app.listen(8080, () => {
     console.log('listening')
 })
